@@ -134,9 +134,14 @@ public final class TypeScriptTranspiler {
             for (String cmd : possibleCommands) {
                 File executable = new File(dir, cmd);
                 if (executable.exists()) {
+                    // On Windows, NEVER allow plain "npx" - it's a Unix script
+                    if (isWindows && "npx".equals(cmd)) {
+                        LOGGER.warn("Skipping Unix npx script on Windows: {}", executable.getAbsolutePath());
+                        continue;
+                    }
                     boolean isExecutable = !isWindows || executable.canExecute() || cmd.endsWith(".cmd") || cmd.endsWith(".exe");
                     if (isExecutable) {
-                        LOGGER.debug("FIXED VERSION - Found npx at {}", executable.getAbsolutePath());
+                        LOGGER.info("FIXED VERSION - Found npx at {}", executable.getAbsolutePath());
                         return executable.getAbsolutePath();
                     }
                 }
