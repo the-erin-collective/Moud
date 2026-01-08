@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 public final class TypeScriptTranspiler {
@@ -78,33 +79,71 @@ public final class TypeScriptTranspiler {
 
     private static String findNpxExecutable() {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-        String[] possibleCommands = isWindows
-                ? new String[]{"npx.cmd", "npx.exe", "npx"}
-                : new String[]{"npx", "npx.cmd", "npx.exe"};
+        LOGGER.info("Finding npx executable on Windows: {}", isWindows);
+        
+        // TEMPORARY FIX: Hardcode npx.cmd path for Windows testing
+        if (isWindows) {
+            String hardcodedPath = "C:\\Program Files\\nodejs\\npx.cmd";
+            File npxCmd = new File(hardcodedPath);
+            if (npxCmd.exists()) {
+                LOGGER.info("Using hardcoded npx.cmd path: {}", hardcodedPath);
+                return hardcodedPath;
+            }
+        }
+        
         String pathEnv = System.getenv("PATH");
 
         if (pathEnv == null || pathEnv.isEmpty()) {
+            LOGGER.warn("PATH environment variable is null or empty");
             return null;
         }
 
         String separator = File.pathSeparator;
         String[] pathDirs = pathEnv.split(separator);
+        LOGGER.info("Checking {} directories in PATH", pathDirs.length);
+
+        // On Windows, explicitly check for .cmd and .exe files first
+        if (isWindows) {
+            LOGGER.info("Windows detected, checking for npx.cmd and npx.exe first");
+            for (String dir : pathDirs) {
+                // Check npx.cmd first
+                File npxCmd = new File(dir, "npx.cmd");
+                if (npxCmd.exists()) {
+                    LOGGER.info("Found npx.cmd at {}", npxCmd.getAbsolutePath());
+                    return npxCmd.getAbsolutePath();
+                }
+                
+                // Then check npx.exe
+                File npxExe = new File(dir, "npx.exe");
+                if (npxExe.exists()) {
+                    LOGGER.info("Found npx.exe at {}", npxExe.getAbsolutePath());
+                    return npxExe.getAbsolutePath();
+                }
+            }
+            LOGGER.warn("No npx.cmd or npx.exe found in PATH");
+        }
+
+        // Fallback to checking all variants
+        String[] possibleCommands = isWindows
+                ? new String[]{"npx.cmd", "npx.exe", "npx"}
+                : new String[]{"npx", "npx.cmd", "npx.exe"};
+
+        LOGGER.info("Fallback: checking for commands {}", Arrays.toString(possibleCommands));
 
         for (String dir : pathDirs) {
             for (String cmd : possibleCommands) {
                 File executable = new File(dir, cmd);
                 if (executable.exists()) {
-                    // On Windows, .cmd and .exe files are executable if they exist
-                    // On Unix-like systems, check if the file is executable
-                    boolean isExecutable = !isWindows || executable.canExecute();
+                    boolean isExecutable = !isWindows || executable.canExecute() || cmd.endsWith(".cmd") || cmd.endsWith(".exe");
                     if (isExecutable) {
-                        LOGGER.debug("Found npx at {}", executable.getAbsolutePath());
+                        LOGGER.debug("FIXED VERSION - Found npx at {}", executable.getAbsolutePath());
                         return executable.getAbsolutePath();
                     }
                 }
             }
         }
 
+        LOGGER.warn("No npx executable found in PATH");
         return null;
     }
 
