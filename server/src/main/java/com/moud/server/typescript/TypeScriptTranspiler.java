@@ -169,6 +169,16 @@ public final class TypeScriptTranspiler {
             cmdLine.addArgument("--target=es2020");
             cmdLine.addArgument("--format=" + bundleFormat.esbuildFormat);
             cmdLine.addArgument("--platform=" + bundleFormat.esbuildPlatform);
+            
+            // Add external Node.js built-in modules to prevent bundling issues
+            String[] nodeBuiltins = {
+                "crypto", "fs", "path", "os", "util", "events", "stream", 
+                "buffer", "child_process", "cluster", "dgram", "dns", "http", 
+                "https", "net", "readline", "repl", "tls", "url", "zlib"
+            };
+            for (String builtin : nodeBuiltins) {
+                cmdLine.addArgument("--external:" + builtin);
+            }
 
             DefaultExecutor executor = DefaultExecutor.builder().get();
             executor.setWorkingDirectory(projectRoot.toFile());
