@@ -24,9 +24,9 @@
   },
   "downloads": {
     "engine": {
-      "baseUrl": "https://github.com/EPI-Studios/Moud/releases/download",
+      "baseUrl": "file:///D:/dev/github/Moud/server/build/libs",
       "fileName": "moud-server.jar",
-      "latestEndpoint": "https://api.github.com/repos/EPI-Studios/Moud/releases/latest"
+      "latestEndpoint": "file:///D:/dev/github/Moud/server/build/libs/moud-server.jar"
     },
     "jdk": {
       "baseUrl": "https://api.adoptium.net/v3/binary/latest/21/ga"

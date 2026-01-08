@@ -200,19 +200,13 @@ export class EnvironmentManager {
       return serverPath;
     }
 
-    logger.info(`Moud Server v${serverVersion} not found in cache.`);
-
-    try {
-      const serverUrl = await this.versionManager.getEngineDownloadUrl();
-      await Downloader.downloadFile(serverUrl, serverPath);
-
-      if (!fs.existsSync(serverPath)) {
-        throw new Error('Server JAR not found after download');
-      }
-
-      return serverPath;
-    } catch (error) {
-      throw new Error(`Failed to download server: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    // Skip auto-download - require manual JAR placement
+    throw new Error(
+      `Moud Server v${serverVersion} not found in cache.\n` +
+      `To fix this:\n` +
+      `1. Build the server: ./gradlew :server:shadowJar\n` +
+      `2. Copy the JAR to: ${serverPath}\n` +
+      `Or place a development JAR at: ${localDevJarPath}`
+    );
   }
 }
