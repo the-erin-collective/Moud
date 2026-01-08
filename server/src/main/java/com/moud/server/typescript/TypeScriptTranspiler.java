@@ -93,12 +93,14 @@ public final class TypeScriptTranspiler {
         for (String dir : pathDirs) {
             for (String cmd : possibleCommands) {
                 File executable = new File(dir, cmd);
-                if (isWindows && "npx".equalsIgnoreCase(cmd)) {
-                    continue;
-                }
-                if (executable.exists() && executable.canExecute()) {
-                    LOGGER.debug("Found npx at {}", executable.getAbsolutePath());
-                    return executable.getAbsolutePath();
+                if (executable.exists()) {
+                    // On Windows, .cmd and .exe files are executable if they exist
+                    // On Unix-like systems, check if the file is executable
+                    boolean isExecutable = !isWindows || executable.canExecute();
+                    if (isExecutable) {
+                        LOGGER.debug("Found npx at {}", executable.getAbsolutePath());
+                        return executable.getAbsolutePath();
+                    }
                 }
             }
         }
