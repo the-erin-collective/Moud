@@ -182,6 +182,13 @@ export class EnvironmentManager {
   }
 
   private async checkAndDownloadServer(): Promise<string> {
+    // First, check for local development JAR (for fork development)
+    const localDevJarPath = path.join(process.cwd(), '..', 'server', 'build', 'libs', 'moud-server.jar');
+    if (fs.existsSync(localDevJarPath)) {
+      logger.success('Using local development Moud Server from fork.');
+      return localDevJarPath;
+    }
+
     const serverVersion = await this.versionManager.getCompatibleEngineVersion();
     logger.step('Checking for Moud Server binary...');
 
