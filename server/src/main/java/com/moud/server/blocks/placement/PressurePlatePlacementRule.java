@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ final class PressurePlatePlacementRule extends BlockPlacementRule {
         if (block == null) {
             return false;
         }
-        String path = block.namespace().path();
+        String path = block.name();
         return path.endsWith("_pressure_plate") || "heavy_weighted_pressure_plate".equals(path) || "light_weighted_pressure_plate".equals(path);
     }
 }

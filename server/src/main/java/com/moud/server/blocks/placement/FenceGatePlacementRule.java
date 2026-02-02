@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -50,11 +51,11 @@ final class FenceGatePlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isWallBlock(@Nullable Block block) {
-        return block != null && block.namespace().path().endsWith("_wall");
+        return block != null && block.name().endsWith("_wall");
     }
 
     private static boolean isFenceGateBlock(@Nullable Block block) {
-        return block != null && block.namespace().path().endsWith("_fence_gate");
+        return block != null && block.name().endsWith("_fence_gate");
     }
 }
 

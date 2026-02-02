@@ -38,3 +38,5 @@ packages/sdk/dist/
 /example/ts/assets/
 /example/ts/animations
 /example/ts/.moud/
+/packages/moud-cli/dist
+/packages/moud-cli/node_modules

@@ -5,6 +5,7 @@ import com.moud.server.editor.SceneDefaults;
 import com.moud.server.instance.InstanceManager;
 import com.moud.server.instance.SceneTerrainGenerator;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,9 +76,9 @@ public final class TerrainRuntimeAdapter implements SceneRuntimeAdapter {
 
     private static Block blockProperty(Object raw, String fallbackId) {
         String namespace = raw != null ? raw.toString() : fallbackId;
-        Block block = Block.fromNamespaceId(namespace);
+        Block block = Block.fromKey(Key.key(namespace));
         if (block == null) {
-            block = Block.fromNamespaceId(fallbackId);
+            block = Block.fromKey(Key.key(fallbackId));
         }
         return block != null ? block : Block.AIR;
     }

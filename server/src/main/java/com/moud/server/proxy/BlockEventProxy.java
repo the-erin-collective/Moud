@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import org.graalvm.polyglot.HostAccess;
 
 @TsExpose

@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -25,11 +26,11 @@ final class SkullPlacementRule extends BlockPlacementRule {
         boolean isWall = isWallSkull(base);
         if (face == BlockFace.TOP) {
             if (isWall) {
-                String standingNamespace = toStandingNamespace(base.namespace().asString());
+                String standingNamespace = toStandingNamespace(base.name());
                 if (standingNamespace == null) {
                     return null;
                 }
-                base = Block.fromNamespaceId(standingNamespace);
+                base = Block.fromKey(Key.key(standingNamespace));
                 if (base == null) {
                     return null;
                 }
@@ -47,12 +48,12 @@ final class SkullPlacementRule extends BlockPlacementRule {
             return skull;
         }
 
-        String wallNamespace = toWallNamespace(base.namespace().asString());
+        String wallNamespace = toWallNamespace(base.name());
         if (wallNamespace == null) {
             return null;
         }
 
-        Block wall = Block.fromNamespaceId(wallNamespace);
+        Block wall = Block.fromKey(Key.key(wallNamespace));
         if (wall == null) {
             return null;
         }
@@ -106,12 +107,12 @@ final class SkullPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isWallSkull(@NotNull Block block) {
-        String path = block.namespace().path();
+        String path = block.name();
         return path.endsWith("_wall_skull") || path.endsWith("_wall_head");
     }
 
     private static boolean isStandingSkull(@NotNull Block block) {
-        String path = block.namespace().path();
+        String path = block.name();
         return path.endsWith("_skull") || path.endsWith("_head");
     }
 

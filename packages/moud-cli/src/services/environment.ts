@@ -111,7 +111,7 @@ export class EnvironmentManager {
 
     try {
       const platformInfo = this.getPlatformInfo();
-      const jdkUrl = `https://api.adoptium.net/v3/binary/latest/21/ga/${platformInfo.os}/${platformInfo.arch}/jdk/hotspot/normal/eclipse`;
+      const jdkUrl = `https://api.adoptium.net/v3/binary/latest/25/ga/${platformInfo.os}/${platformInfo.arch}/jdk/hotspot/normal/eclipse`;
       const tempFilePath = path.join(this.moudHome, 'temp', `jdk-${jdkVersion}.${platformInfo.ext}`);
 
       this.cleanupManager.registerTempDir(path.dirname(tempFilePath));

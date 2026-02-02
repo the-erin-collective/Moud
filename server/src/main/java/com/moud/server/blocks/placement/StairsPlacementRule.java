@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -104,7 +105,7 @@ final class StairsPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isStairsBlock(@Nullable Block block) {
-        return block != null && block.namespace().path().endsWith("_stairs");
+        return block != null && block.name().endsWith("_stairs");
     }
 }
 

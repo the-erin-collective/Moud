@@ -126,7 +126,7 @@ public class InstanceManager {
             defaultInstance.setTag(SPAWN_TAG, new Pos(0.5, SceneDefaults.defaultSpawnY(), 0.5));
             configureDefaultChunkLoader(defaultInstance);
             namedInstances.put("default", defaultInstance);
-            instanceRegistry.put(defaultInstance.getUniqueId(), defaultInstance);
+            instanceRegistry.put(defaultInstance.getUuid(), defaultInstance);
             LOGGER.info("Default instance created with scene terrain generator");
         }
     }
@@ -136,7 +136,7 @@ public class InstanceManager {
             limboInstance = minestomInstanceManager.createInstanceContainer();
 
             limboInstance.setGenerator(unit -> {});
-            instanceRegistry.put(limboInstance.getUniqueId(), limboInstance);
+            instanceRegistry.put(limboInstance.getUuid(), limboInstance);
             LOGGER.info("Limbo instance created for safe player spawning");
         }
     }
@@ -527,7 +527,7 @@ public class InstanceManager {
 
         InstanceContainer instance = minestomInstanceManager.createInstanceContainer();
         namedInstances.put(name, instance);
-        instanceRegistry.put(instance.getUniqueId(), instance);
+        instanceRegistry.put(instance.getUuid(), instance);
         LOGGER.info("Created instance: {}", name);
         return instance;
     }
@@ -544,7 +544,7 @@ public class InstanceManager {
 
         SharedInstance sharedInstance = minestomInstanceManager.createSharedInstance(parent);
         namedInstances.put(name, sharedInstance);
-        instanceRegistry.put(sharedInstance.getUniqueId(), sharedInstance);
+        instanceRegistry.put(sharedInstance.getUuid(), sharedInstance);
         LOGGER.info("Created shared instance: {} from parent instance", name);
         return sharedInstance;
     }
@@ -590,7 +590,7 @@ public class InstanceManager {
         }
 
         namedInstances.put(name, instance);
-        instanceRegistry.put(instance.getUniqueId(), instance);
+        instanceRegistry.put(instance.getUuid(), instance);
         LOGGER.info("Loaded world from {} into instance: {} ({}/25 chunks loaded)", worldPath, name, loadedChunks);
         return instance;
     }
@@ -628,7 +628,7 @@ public class InstanceManager {
         }
 
         namedInstances.put(name, instance);
-        instanceRegistry.put(instance.getUniqueId(), instance);
+        instanceRegistry.put(instance.getUuid(), instance);
         LOGGER.info("Loaded world from {} into instance '{}' (sceneId='{}')", sceneWorldFile, name, sceneId);
         return instance;
     }
@@ -713,7 +713,7 @@ public class InstanceManager {
     public void unregisterInstance(String name) {
         Instance instance = namedInstances.remove(name);
         if (instance != null) {
-            instanceRegistry.remove(instance.getUniqueId());
+            instanceRegistry.remove(instance.getUuid());
             minestomInstanceManager.unregisterInstance(instance);
             LOGGER.info("Unregistered instance: {}", name);
         }

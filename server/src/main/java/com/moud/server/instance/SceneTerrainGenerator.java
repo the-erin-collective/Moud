@@ -3,6 +3,7 @@ package com.moud.server.instance;
 import com.moud.server.editor.SceneDefaults;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.generator.GenerationUnit;
 import net.minestom.server.instance.generator.UnitModifier;
 
@@ -86,7 +87,7 @@ public final class SceneTerrainGenerator {
     }
 
     private static Block resolveBlock(String namespaceId) {
-        Block resolved = Block.fromNamespaceId(namespaceId);
+        Block resolved = Block.fromKey(Key.key(namespaceId));
         return resolved != null ? resolved : Block.AIR;
     }
 

@@ -15,6 +15,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Section;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.Nullable;
 

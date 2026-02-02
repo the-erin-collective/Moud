@@ -3,7 +3,7 @@
     "cli": "0.3.11",
     "sdk": "0.7.0",
     "engine": "latest",
-    "jdk": "21"
+    "jdk": "25"
   },
   "compatibility": {
     "0.1.3": { "sdk": "0.1.1-alpha", "engine": "0.1.0-alpha" },
@@ -19,7 +19,8 @@
     "0.3.6": { "sdk": "0.7.0", "engine": "latest" },
     "0.3.7": { "sdk": "0.7.0", "engine": "latest" },
     "0.3.8": { "sdk": "0.7.0", "engine": "latest" },
-    "0.3.11": { "sdk": "0.7.0", "engine": "latest" }
+    "0.3.11": { "sdk": "0.7.0", "engine": "latest" },
+    "0.8.0": { "sdk": "0.7.0", "engine": "latest" }
 
   },
   "downloads": {
@@ -29,7 +30,7 @@
       "latestEndpoint": "file:///D:/dev/github/Moud/server/build/libs/moud-server.jar"
     },
     "jdk": {
-      "baseUrl": "https://api.adoptium.net/v3/binary/latest/21/ga"
+      "baseUrl": "https://api.adoptium.net/v3/binary/latest/25/ga"
     }
   }
 }

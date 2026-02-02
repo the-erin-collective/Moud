@@ -290,7 +290,7 @@ public final class ChunkPhysicsManager {
     }
 
     private void remeshAllChunksForInstance(Instance instance) {
-        UUID instanceId = instance.getUniqueId();
+        UUID instanceId = instance.getUuid();
         if (instanceId == null) {
             instanceId = ChunkKey.FALLBACK_INSTANCE_ID;
         }

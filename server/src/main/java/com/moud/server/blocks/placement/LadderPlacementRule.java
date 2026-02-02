@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +52,7 @@ final class LadderPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isLadderBlock(@Nullable Block block) {
-        return block != null && "ladder".equals(block.namespace().path());
+        return block != null && "ladder".equals(block.name());
     }
 }
 

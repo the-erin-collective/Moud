@@ -31,6 +31,7 @@ import net.minestom.server.event.player.PlayerGameModeChangeEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 

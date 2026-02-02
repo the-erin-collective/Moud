@@ -5,6 +5,7 @@ import java.util.Set;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockManager;
 
 public final class VanillaPlacementRules {
@@ -54,14 +55,14 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            Block base = block.defaultState();
-            if (!base.properties().containsKey("axis")) {
+            String path = block.name();
+            if (!path.endsWith("_pillar") && !path.endsWith("_wall")) {
                 continue;
             }
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(path)) {
                 continue;
             }
-            for (Block state : base.possibleStates()) {
+            for (Block state : block.possibleStates()) {
                 blockManager.registerBlockPlacementRule(new PillarPlacementRule(state));
             }
         }
@@ -73,96 +74,15 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_wall")) {
                 continue;
             }
-            Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(path)) {
                 continue;
             }
-            for (Block state : base.possibleStates()) {
+            for (Block state : block.possibleStates()) {
                 blockManager.registerBlockPlacementRule(new WallPlacementRule(state));
-            }
-        }
-    }
-
-    private static void registerSlabs(BlockManager blockManager) {
-        Set<String> registered = new HashSet<>();
-        for (Block block : Block.values()) {
-            if (block == null) {
-                continue;
-            }
-            String path = block.namespace().path();
-            if (!path.endsWith("_slab")) {
-                continue;
-            }
-            Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
-                continue;
-            }
-            for (Block state : base.possibleStates()) {
-                blockManager.registerBlockPlacementRule(new SlabPlacementRule(state));
-            }
-        }
-    }
-
-    private static void registerStairs(BlockManager blockManager) {
-        Set<String> registered = new HashSet<>();
-        for (Block block : Block.values()) {
-            if (block == null) {
-                continue;
-            }
-            String path = block.namespace().path();
-            if (!path.endsWith("_stairs")) {
-                continue;
-            }
-            Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
-                continue;
-            }
-            for (Block state : base.possibleStates()) {
-                blockManager.registerBlockPlacementRule(new StairsPlacementRule(state));
-            }
-        }
-    }
-
-    private static void registerDoors(BlockManager blockManager) {
-        Set<String> registered = new HashSet<>();
-        for (Block block : Block.values()) {
-            if (block == null) {
-                continue;
-            }
-            String path = block.namespace().path();
-            if (!path.endsWith("_door") || path.endsWith("_trapdoor")) {
-                continue;
-            }
-            Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
-                continue;
-            }
-            for (Block state : base.possibleStates()) {
-                blockManager.registerBlockPlacementRule(new DoorPlacementRule(state));
-            }
-        }
-    }
-
-    private static void registerTrapdoors(BlockManager blockManager) {
-        Set<String> registered = new HashSet<>();
-        for (Block block : Block.values()) {
-            if (block == null) {
-                continue;
-            }
-            String path = block.namespace().path();
-            if (!path.endsWith("_trapdoor")) {
-                continue;
-            }
-            Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
-                continue;
-            }
-            for (Block state : base.possibleStates()) {
-                blockManager.registerBlockPlacementRule(new TrapdoorPlacementRule(state));
             }
         }
     }
@@ -173,15 +93,14 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_bed")) {
                 continue;
             }
-            Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(path)) {
                 continue;
             }
-            for (Block state : base.possibleStates()) {
+            for (Block state : block.possibleStates()) {
                 blockManager.registerBlockPlacementRule(new BedPlacementRule(state));
             }
         }
@@ -193,16 +112,91 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_banner")) {
                 continue;
             }
-            Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(path)) {
                 continue;
             }
-            for (Block state : base.possibleStates()) {
+            for (Block state : block.possibleStates()) {
                 blockManager.registerBlockPlacementRule(new BannerPlacementRule(state));
+            }
+        }
+    }
+
+    private static void registerSlabs(BlockManager blockManager) {
+        Set<String> registered = new HashSet<>();
+        for (Block block : Block.values()) {
+            if (block == null) {
+                continue;
+            }
+            String path = block.name();
+            if (!path.endsWith("_slab")) {
+                continue;
+            }
+            if (!registered.add(path)) {
+                continue;
+            }
+            for (Block state : block.possibleStates()) {
+                blockManager.registerBlockPlacementRule(new SlabPlacementRule(state));
+            }
+        }
+    }
+
+    private static void registerStairs(BlockManager blockManager) {
+        Set<String> registered = new HashSet<>();
+        for (Block block : Block.values()) {
+            if (block == null) {
+                continue;
+            }
+            String path = block.name();
+            if (!path.endsWith("_stairs")) {
+                continue;
+            }
+            if (!registered.add(path)) {
+                continue;
+            }
+            for (Block state : block.possibleStates()) {
+                blockManager.registerBlockPlacementRule(new StairsPlacementRule(state));
+            }
+        }
+    }
+
+    private static void registerDoors(BlockManager blockManager) {
+        Set<String> registered = new HashSet<>();
+        for (Block block : Block.values()) {
+            if (block == null) {
+                continue;
+            }
+            String path = block.name();
+            if (!path.endsWith("_door")) {
+                continue;
+            }
+            if (!registered.add(path)) {
+                continue;
+            }
+            for (Block state : block.possibleStates()) {
+                blockManager.registerBlockPlacementRule(new DoorPlacementRule(state));
+            }
+        }
+    }
+
+    private static void registerTrapdoors(BlockManager blockManager) {
+        Set<String> registered = new HashSet<>();
+        for (Block block : Block.values()) {
+            if (block == null) {
+                continue;
+            }
+            String path = block.name();
+            if (!path.endsWith("_trapdoor")) {
+                continue;
+            }
+            if (!registered.add(path)) {
+                continue;
+            }
+            for (Block state : block.possibleStates()) {
+                blockManager.registerBlockPlacementRule(new TrapdoorPlacementRule(state));
             }
         }
     }
@@ -213,12 +207,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_sign") || path.endsWith("_hanging_sign")) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -233,12 +227,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_torch")) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -253,11 +247,11 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            if (!"ladder".equals(block.namespace().path())) {
+            if (!"ladder".equals(block.name())) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -272,12 +266,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_button")) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -292,11 +286,11 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            if (!"lever".equals(block.namespace().path())) {
+            if (!"lever".equals(block.name())) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -311,12 +305,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_pane") && !"iron_bars".equals(path)) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -331,12 +325,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_fence") || path.endsWith("_fence_gate")) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -351,12 +345,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_fence_gate")) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -371,7 +365,7 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("lantern")) {
                 continue;
             }
@@ -379,7 +373,7 @@ public final class VanillaPlacementRules {
             if (!base.properties().containsKey("hanging")) {
                 continue;
             }
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -394,14 +388,14 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_pressure_plate")
                     && !"heavy_weighted_pressure_plate".equals(path)
                     && !"light_weighted_pressure_plate".equals(path)) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -416,7 +410,7 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             boolean isSkull = path.endsWith("_skull") || path.endsWith("_wall_skull");
             boolean isHead = path.endsWith("_head") || path.endsWith("_wall_head");
             if (!isSkull && !isHead) {
@@ -426,7 +420,7 @@ public final class VanillaPlacementRules {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -441,12 +435,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!"chest".equals(path) && !"trapped_chest".equals(path)) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -461,7 +455,7 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!path.endsWith("_candle") && !"candle".equals(path)) {
                 continue;
             }
@@ -469,7 +463,7 @@ public final class VanillaPlacementRules {
             if (!base.properties().containsKey("candles")) {
                 continue;
             }
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -484,11 +478,11 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            if (!"snow".equals(block.namespace().path())) {
+            if (!"snow".equals(block.name())) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -503,12 +497,12 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!"repeater".equals(path) && !"comparator".equals(path)) {
                 continue;
             }
             Block base = block.defaultState();
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -523,7 +517,7 @@ public final class VanillaPlacementRules {
             if (block == null) {
                 continue;
             }
-            String path = block.namespace().path();
+            String path = block.name();
             if (!"rail".equals(path) && !path.endsWith("_rail")) {
                 continue;
             }
@@ -531,7 +525,7 @@ public final class VanillaPlacementRules {
             if (!base.properties().containsKey("shape")) {
                 continue;
             }
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {
@@ -550,10 +544,10 @@ public final class VanillaPlacementRules {
             if (!DirectionalFacingPlacementRule.looksDirectional(base)) {
                 continue;
             }
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
-            String path = base.namespace().path();
+            String path = base.name();
             if (shouldSkipGenericFacing(path)) {
                 continue;
             }
@@ -573,10 +567,10 @@ public final class VanillaPlacementRules {
             if (!DirectionalFacingPlacementRule.looksHorizontalOnly(base)) {
                 continue;
             }
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
-            String path = base.namespace().path();
+            String path = base.name();
             if (shouldSkipGenericFacing(path)) {
                 continue;
             }
@@ -596,7 +590,7 @@ public final class VanillaPlacementRules {
             if (!base.properties().containsKey("rotation")) {
                 continue;
             }
-            String path = base.namespace().path();
+            String path = base.name();
             if (path.endsWith("_banner") || path.endsWith("_wall_banner")) {
                 continue;
             }
@@ -606,7 +600,7 @@ public final class VanillaPlacementRules {
             if (path.endsWith("_skull") || path.endsWith("_wall_skull") || path.endsWith("_head") || path.endsWith("_wall_head")) {
                 continue;
             }
-            if (!registered.add(base.namespace().asString())) {
+            if (!registered.add(base.name())) {
                 continue;
             }
             for (Block state : base.possibleStates()) {

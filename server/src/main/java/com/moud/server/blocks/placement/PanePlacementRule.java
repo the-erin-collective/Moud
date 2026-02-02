@@ -4,6 +4,7 @@ import java.util.Map;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +67,7 @@ final class PanePlacementRule extends BlockPlacementRule {
         if (block == null) {
             return false;
         }
-        String path = block.namespace().path();
+        String path = block.name();
         return path.endsWith("_pane") || "iron_bars".equals(path);
     }
 }

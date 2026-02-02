@@ -23,6 +23,7 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
@@ -119,7 +120,7 @@ public class WorldProxy {
     @HostAccess.Export
     public void setBlock(int x, int y, int z, String blockId) {
         validator.validateBlockId(blockId);
-        Block block = Block.fromNamespaceId(blockId);
+        Block block = Block.fromKey(Key.key(blockId));
         if (block == null) throw new APIException("INVALID_BLOCK_ID", "Unknown block ID: " + blockId);
         Instance target = requireInstance();
         target.setBlock(x, y, z, block);
@@ -294,7 +295,7 @@ public class WorldProxy {
 
     @HostAccess.Export
     public void spawnScriptedEntity(String entityType, double x, double y, double z, Value jsInstance) {
-        EntityType type = EntityType.fromNamespaceId(entityType);
+        EntityType type = EntityType.fromKey(Key.key(entityType));
         if (type == null) throw new APIException("UNKNOWN_ENTITY_TYPE", "Unknown entity type: " + entityType);
         ScriptedEntity entity = new ScriptedEntity(type, jsInstance);
         entity.setInstance(requireInstance(), new Pos(x, y, z));

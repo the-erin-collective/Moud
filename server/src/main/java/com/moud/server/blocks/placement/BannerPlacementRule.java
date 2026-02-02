@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -23,14 +24,14 @@ final class BannerPlacementRule extends BlockPlacementRule {
         }
 
         Block base = state.block().defaultState();
-        boolean isWallBanner = base.namespace().path().endsWith("_wall_banner");
+        boolean isWallBanner = base.name().endsWith("_wall_banner");
         if (face == BlockFace.TOP) {
             if (isWallBanner) {
-                String standingNamespace = toStandingBannerNamespace(base.namespace().asString());
+                String standingNamespace = toStandingBannerNamespace(base.name());
                 if (standingNamespace == null) {
                     return null;
                 }
-                base = Block.fromNamespaceId(standingNamespace);
+                base = Block.fromKey(Key.key(standingNamespace));
                 if (base == null) {
                     return null;
                 }
@@ -44,12 +45,12 @@ final class BannerPlacementRule extends BlockPlacementRule {
             return base.withProperty(PROP_ROTATION, Integer.toString(segment));
         }
 
-        String wallNamespace = toWallBannerNamespace(base.namespace().asString());
+        String wallNamespace = toWallBannerNamespace(base.name());
         if (wallNamespace == null) {
             return null;
         }
 
-        Block wall = Block.fromNamespaceId(wallNamespace);
+        Block wall = Block.fromKey(Key.key(wallNamespace));
         if (wall == null) {
             return null;
         }
@@ -70,7 +71,7 @@ final class BannerPlacementRule extends BlockPlacementRule {
             return current;
         }
 
-        String path = current.namespace().path();
+        String path = current.name();
         Point pos = state.blockPosition();
         if (path.endsWith("_wall_banner")) {
             String facingValue = current.getProperty(PROP_FACING);

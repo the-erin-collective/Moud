@@ -7,7 +7,7 @@
     "moud": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc && cp config.json dist/ && chmod +x dist/index.js"
+    "build": "tsc && copy config.json dist\\ && copy config.json dist\\config.json"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",

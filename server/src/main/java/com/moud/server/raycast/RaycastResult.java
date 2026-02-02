@@ -3,6 +3,7 @@ package com.moud.server.raycast;
 import com.moud.api.math.Vector3;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.Nullable;
 
 public record RaycastResult(

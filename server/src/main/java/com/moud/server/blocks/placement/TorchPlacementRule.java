@@ -1,7 +1,9 @@
 package com.moud.server.blocks.placement;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -22,14 +24,15 @@ final class TorchPlacementRule extends BlockPlacementRule {
         }
 
         Block base = state.block().defaultState();
-        boolean isWallTorch = base.namespace().path().endsWith("_wall_torch");
+        boolean isWallTorch = base.name().endsWith("_wall_torch");
+        
         if (face == BlockFace.TOP) {
             if (isWallTorch) {
-                String standingNamespace = toStandingTorchNamespace(base.namespace().asString());
+                String standingNamespace = toStandingTorchNamespace(base.name());
                 if (standingNamespace == null) {
                     return null;
                 }
-                base = Block.fromNamespaceId(standingNamespace);
+                base = Block.fromKey(Key.key(standingNamespace));
                 if (base == null) {
                     return null;
                 }
@@ -42,12 +45,12 @@ final class TorchPlacementRule extends BlockPlacementRule {
             return base;
         }
 
-        String wallNamespace = toWallTorchNamespace(base.namespace().asString());
+        String wallNamespace = toWallTorchNamespace(base.name());
         if (wallNamespace == null) {
             return null;
         }
 
-        Block wall = Block.fromNamespaceId(wallNamespace);
+        Block wall = Block.fromKey(Key.key(wallNamespace));
         if (wall == null) {
             return null;
         }
@@ -68,9 +71,9 @@ final class TorchPlacementRule extends BlockPlacementRule {
             return current;
         }
 
-        String path = current.namespace().path();
+        String name = current.name();
         Point pos = state.blockPosition();
-        if (path.endsWith("_wall_torch")) {
+        if (name.endsWith("_wall_torch")) {
             String facingValue = current.getProperty(PROP_FACING);
             if (facingValue == null) {
                 return current;
@@ -83,7 +86,7 @@ final class TorchPlacementRule extends BlockPlacementRule {
             return current;
         }
 
-        if (path.endsWith("_torch")) {
+        if (name.endsWith("_torch")) {
             Block support = state.instance().getBlock(pos.relative(BlockFace.BOTTOM));
             if (!PlacementRuleUtils.isFaceFull(support, BlockFace.TOP)) {
                 return Block.AIR;
@@ -94,43 +97,34 @@ final class TorchPlacementRule extends BlockPlacementRule {
     }
 
     private static String toWallTorchNamespace(String baseNamespace) {
-        if (baseNamespace == null) {
-            return null;
-        }
+        if (baseNamespace == null) return null;
+        
         int split = baseNamespace.indexOf(':');
-        if (split <= 0 || split == baseNamespace.length() - 1) {
-            return null;
-        }
+        if (split <= 0 || split == baseNamespace.length() - 1) return null;
+
         String domain = baseNamespace.substring(0, split);
         String path = baseNamespace.substring(split + 1);
-        if (path.endsWith("_wall_torch")) {
-            return baseNamespace;
-        }
-        if (!path.endsWith("_torch")) {
-            return null;
-        }
+        
+        if (path.endsWith("_wall_torch")) return baseNamespace;
+        if (!path.endsWith("_torch")) return null;
+
         String wallPath = path.substring(0, path.length() - "_torch".length()) + "_wall_torch";
         return domain + ":" + wallPath;
     }
 
     private static String toStandingTorchNamespace(String baseNamespace) {
-        if (baseNamespace == null) {
-            return null;
-        }
+        if (baseNamespace == null) return null;
+
         int split = baseNamespace.indexOf(':');
-        if (split <= 0 || split == baseNamespace.length() - 1) {
-            return null;
-        }
+        if (split <= 0 || split == baseNamespace.length() - 1) return null;
+
         String domain = baseNamespace.substring(0, split);
         String path = baseNamespace.substring(split + 1);
-        if (path.endsWith("_torch") && !path.endsWith("_wall_torch")) {
-            return baseNamespace;
-        }
-        if (!path.endsWith("_wall_torch")) {
-            return null;
-        }
+
+        if (path.endsWith("_torch") && !path.endsWith("_wall_torch")) return baseNamespace;
+        if (!path.endsWith("_wall_torch")) return null;
+
         String standingPath = path.substring(0, path.length() - "_wall_torch".length()) + "_torch";
         return domain + ":" + standingPath;
     }
 }
-

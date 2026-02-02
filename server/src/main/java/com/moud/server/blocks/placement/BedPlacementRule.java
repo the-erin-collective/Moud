@@ -3,6 +3,7 @@ package com.moud.server.blocks.placement;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +73,7 @@ final class BedPlacementRule extends BlockPlacementRule {
 
         Point otherPos = state.blockPosition().relative(otherOffset);
         Block other = state.instance().getBlock(otherPos);
-        if (!isBedBlock(other) || !other.namespace().equals(current.namespace())) {
+        if (!isBedBlock(other) || !other.name().equals(current.name())) {
             return Block.AIR;
         }
 
@@ -80,7 +81,7 @@ final class BedPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isBedBlock(Block block) {
-        return block != null && block.namespace().path().endsWith("_bed");
+        return block != null && block.name().endsWith("_bed");
     }
 
     private static BlockFace faceFromProperty(String facingValue) {

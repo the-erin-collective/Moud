@@ -4,6 +4,7 @@ import java.util.Map;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -68,12 +69,12 @@ final class FencePlacementRule extends BlockPlacementRule {
         if (block == null) {
             return false;
         }
-        String path = block.namespace().path();
+        String path = block.name();
         return path.endsWith("_fence") && !path.endsWith("_fence_gate");
     }
 
     private static boolean isFenceGateBlock(@Nullable Block block) {
-        return block != null && block.namespace().path().endsWith("_fence_gate");
+        return block != null && block.name().endsWith("_fence_gate");
     }
 }
 

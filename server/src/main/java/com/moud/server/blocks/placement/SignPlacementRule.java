@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -22,14 +23,14 @@ final class SignPlacementRule extends BlockPlacementRule {
         }
 
         Block base = state.block().defaultState();
-        boolean isWallSign = base.namespace().path().endsWith("_wall_sign");
+        boolean isWallSign = base.name().endsWith("_wall_sign");
         if (face == BlockFace.TOP) {
             if (isWallSign) {
-                String standingNamespace = toStandingSignNamespace(base.namespace().asString());
+                String standingNamespace = toStandingSignNamespace(base.name());
                 if (standingNamespace == null) {
                     return null;
                 }
-                base = Block.fromNamespaceId(standingNamespace);
+                base = Block.fromKey(Key.key(standingNamespace));
                 if (base == null) {
                     return null;
                 }
@@ -45,12 +46,12 @@ final class SignPlacementRule extends BlockPlacementRule {
             return sign;
         }
 
-        String wallNamespace = toWallSignNamespace(base.namespace().asString());
+        String wallNamespace = toWallSignNamespace(base.name());
         if (wallNamespace == null) {
             return null;
         }
 
-        Block wall = Block.fromNamespaceId(wallNamespace);
+        Block wall = Block.fromKey(Key.key(wallNamespace));
         if (wall == null) {
             return null;
         }
@@ -73,7 +74,7 @@ final class SignPlacementRule extends BlockPlacementRule {
             return current;
         }
 
-        String path = current.namespace().path();
+        String path = current.name();
         Point pos = state.blockPosition();
         if (path.endsWith("_wall_sign")) {
             String facingValue = current.getProperty(PlacementRuleUtils.PROP_FACING);

@@ -4,21 +4,18 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven {
-        url = "https://repo.minestom.com/"
-    }
 }
 
 dependencies {
     api project(':api')
-    api 'net.minestom:minestom-snapshots:f966351cb7'
+    api 'net.minestom:minestom:2026.01.08-1.21.11'
     api 'org.slf4j:slf4j-api:2.0.9'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
     withSourcesJar()
     withJavadocJar()

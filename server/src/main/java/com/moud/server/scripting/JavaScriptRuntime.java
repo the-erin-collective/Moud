@@ -155,6 +155,22 @@ public class JavaScriptRuntime {
         }, executor);
     }
 
+    public CompletableFuture<Void> registerGlobal(String name, Object value) {
+        if (name == null || name.isBlank() || value == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        return CompletableFuture.runAsync(() -> {
+            jsContext.enter();
+            try {
+                jsContext.getBindings("js").putMember(name, value);
+                LOGGER.info("Registered external JS global: {}", name);
+            } finally {
+                jsContext.leave();
+            }
+        }, executor);
+    }
+
     private void bindEventAPI(Value apiObject, ScriptingAPI scriptingAPI) {
         if (apiObject == null || scriptingAPI == null) {
             return;

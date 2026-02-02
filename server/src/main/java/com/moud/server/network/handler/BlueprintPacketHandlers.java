@@ -15,6 +15,7 @@ import com.moud.server.permissions.ServerPermission;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -417,7 +418,7 @@ public final class BlueprintPacketHandlers implements PacketHandlerGroup {
     }
 
     private Block resolveTransformedBlock(String rawState, PlacementSettings s) {
-        Block block = Block.fromNamespaceId(rawState);
+        Block block = Block.fromKey(Key.key(rawState));
         if (block == null) return null;
 
         Map<String, String> properties = new HashMap<>(block.properties());

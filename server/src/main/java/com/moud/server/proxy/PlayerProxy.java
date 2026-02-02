@@ -19,6 +19,7 @@ import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
@@ -119,13 +120,13 @@ public class PlayerProxy {
     @HostAccess.Export
     public String getWorld() {
         Instance inst = player.getInstance();
-        return inst != null ? inst.getUniqueId().toString() : null;
+        return inst != null ? inst.getUuid().toString() : null;
     }
 
     @HostAccess.Export
     public String getWorldName() {
         Instance inst = player.getInstance();
-        return inst != null ? inst.getUniqueId().toString() : null;
+        return inst != null ? inst.getUuid().toString() : null;
     }
 
     @HostAccess.Export

@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,7 @@ final class PlacementRuleUtils {
 
     static boolean shouldWaterlog(@NotNull BlockPlacementRule.PlacementState state) {
         Block existing = state.instance().getBlock(state.placePosition());
-        return existing != null && "minecraft:water".equals(existing.namespace().asString());
+        return existing != null && "minecraft:water".equals(existing.name());
     }
 
     static double localX(@NotNull Point cursorPosition, @NotNull Point blockPosition) {

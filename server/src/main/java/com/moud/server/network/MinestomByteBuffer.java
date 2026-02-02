@@ -11,11 +11,12 @@ public class MinestomByteBuffer implements ByteBuffer {
     private final NetworkBuffer buffer;
 
     public MinestomByteBuffer() {
-        this.buffer = new NetworkBuffer();
+        this.buffer = NetworkBuffer.resizableBuffer();
     }
 
     public MinestomByteBuffer(byte[] data) {
-        this.buffer = new NetworkBuffer(java.nio.ByteBuffer.wrap(data));
+        this.buffer = NetworkBuffer.resizableBuffer();
+        this.buffer.write(BYTE_ARRAY, data);
     }
 
     @Override
@@ -100,17 +101,29 @@ public class MinestomByteBuffer implements ByteBuffer {
 
     @Override
     public int readableBytes() {
-        return buffer.readableBytes();
+        return (int) buffer.readableBytes();
     }
 
     @Override
     public void readBytes(byte[] dst) {
-        byte[] temp = buffer.readBytes(dst.length);
-        System.arraycopy(temp, 0, dst, 0, temp.length);
+        // In 1.21.11, read(BYTE) is the proper way to iterate if readRawBytes is unavailable
+        int available = Math.min(dst.length, (int) buffer.readableBytes());
+        for (int i = 0; i < available; i++) {
+            dst[i] = buffer.read(BYTE);
+        }
     }
 
     @Override
     public byte[] toByteArray() {
-        return buffer.readBytes(buffer.readableBytes());
+        // copy(index, length) is the correct signature in this version
+        long readIndex = buffer.readIndex();
+        long length = buffer.readableBytes();
+        NetworkBuffer slice = buffer.copy(readIndex, length);
+        
+        byte[] bytes = new byte[(int) length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = slice.read(BYTE);
+        }
+        return bytes;
     }
 }

@@ -2,6 +2,7 @@ package com.moud.server.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +17,7 @@ final class CandlePlacementRule extends BlockPlacementRule {
     @Override
     public boolean isSelfReplaceable(@NotNull Replacement replacement) {
         Block existing = replacement.block();
-        if (existing == null || !existing.namespace().equals(getBlock().namespace())) {
+        if (existing == null || !existing.name().equals(getBlock().name())) {
             return false;
         }
         String candles = existing.getProperty(PROP_CANDLES);
@@ -39,7 +40,7 @@ final class CandlePlacementRule extends BlockPlacementRule {
 
         Point pos = state.placePosition();
         Block existing = state.instance().getBlock(pos);
-        if (existing != null && existing.namespace().equals(base.namespace())) {
+        if (existing != null && existing.name().equals(base.name())) {
             String candles = existing.getProperty(PROP_CANDLES);
             if (candles != null) {
                 try {

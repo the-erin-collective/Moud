@@ -30,7 +30,7 @@ public final class TypeScriptTranspiler {
     }
 
     public static CompletableFuture<String> transpile(Path tsFile, boolean isClientScript) {
-        return transpile(tsFile, isClientScript ? BundleFormat.CLIENT_IIFE : BundleFormat.SERVER_ESM);
+        return transpile(tsFile, isClientScript ? BundleFormat.CLIENT_IIFE : BundleFormat.SERVER_IIFE);
     }
 
     public static CompletableFuture<String> transpileSharedPhysics(Path tsFile) {
@@ -141,7 +141,7 @@ public final class TypeScriptTranspiler {
                     }
                     boolean isExecutable = !isWindows || executable.canExecute() || cmd.endsWith(".cmd") || cmd.endsWith(".exe");
                     if (isExecutable) {
-                        LOGGER.info("FIXED VERSION - Found npx at {}", executable.getAbsolutePath());
+                        LOGGER.info("🎉 USING FIXED VERSION - Found npx at {}", executable.getAbsolutePath());
                         return executable.getAbsolutePath();
                     }
                 }
@@ -170,15 +170,40 @@ public final class TypeScriptTranspiler {
             cmdLine.addArgument("--format=" + bundleFormat.esbuildFormat);
             cmdLine.addArgument("--platform=" + bundleFormat.esbuildPlatform);
             
-            // Add external Node.js built-in modules to prevent bundling issues
-            String[] nodeBuiltins = {
-                "crypto", "fs", "path", "os", "util", "events", "stream", 
-                "buffer", "child_process", "cluster", "dgram", "dns", "http", 
-                "https", "net", "readline", "repl", "tls", "url", "zlib"
-            };
-            for (String builtin : nodeBuiltins) {
-                cmdLine.addArgument("--external:" + builtin);
-            }
+            // Define global replacements for Node.js modules
+            cmdLine.addArgument("--define:require=require");
+            cmdLine.addArgument("--define:global=global");
+            
+            // Externalize Node.js built-in modules for GraalVM
+            cmdLine.addArgument("--external:fs");
+            cmdLine.addArgument("--external:path");
+            cmdLine.addArgument("--external:crypto");
+            cmdLine.addArgument("--external:os");
+            cmdLine.addArgument("--external:util");
+            cmdLine.addArgument("--external:events");
+            cmdLine.addArgument("--external:stream");
+            cmdLine.addArgument("--external:buffer");
+            cmdLine.addArgument("--external:child_process");
+            cmdLine.addArgument("--external:cluster");
+            cmdLine.addArgument("--external:dgram");
+            cmdLine.addArgument("--external:dns");
+            cmdLine.addArgument("--external:http");
+            cmdLine.addArgument("--external:https");
+            cmdLine.addArgument("--external:net");
+            cmdLine.addArgument("--external:readline");
+            cmdLine.addArgument("--external:repl");
+            cmdLine.addArgument("--external:tls");
+            cmdLine.addArgument("--external:url");
+            cmdLine.addArgument("--external:zlib");
+            
+            // Don't externalize modules - let them bundle with polyfills available
+            // Only external @epi-studio/moud-sdk
+            cmdLine.addArgument("--external:@epi-studio/moud-sdk");
+            
+            // Add inject polyfill at the beginning of the bundle
+            cmdLine.addArgument("--inject:./global-polyfills.js");
+
+            LOGGER.info("🎯 DEBUG: Full esbuild command: {}", cmdLine.toString());
 
             DefaultExecutor executor = DefaultExecutor.builder().get();
             executor.setWorkingDirectory(projectRoot.toFile());
@@ -189,7 +214,7 @@ public final class TypeScriptTranspiler {
                     .get();
             executor.setWatchdog(watchdog);
 
-            int exitCode = executor.execute(cmdLine);
+            int exitCode = executor.execute(cmdLine, System.getenv());
             if (exitCode != 0) {
                 String error = stderr.toString(StandardCharsets.UTF_8);
                 LOGGER.error("esbuild failed with exit code {}: {}", exitCode, error);
@@ -213,7 +238,7 @@ public final class TypeScriptTranspiler {
     }
 
     private enum BundleFormat {
-        SERVER_ESM("esm", "node", "server.bundle.js"),
+        SERVER_IIFE("cjs", "neutral", "server.bundle.js"),
         CLIENT_IIFE("iife", "browser", "client.bundle.js"),
         SHARED_PHYSICS_CJS("cjs", "neutral", "shared.bundle.js");
 

@@ -40,10 +40,14 @@ import com.moud.network.buffer.ByteBuffer;
 import com.moud.server.shared.SharedValueManager;
 import com.moud.server.physics.player.SharedPhysicsLoader;
 import com.moud.server.zone.ZoneManager;
+import net.hollowcube.minestom.extensions.ExtensionBootstrap;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.graalvm.polyglot.HostAccess;
+
+import java.util.Map;
+import java.util.HashMap;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -93,6 +97,7 @@ public class MoudEngine {
     private final List<MoudScriptModule> scriptModules = new CopyOnWriteArrayList<>();
     private final List<MoudSystem> systems = new CopyOnWriteArrayList<>();
     private volatile Task systemsTask;
+    private final ExtensionBootstrap server;
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private final AtomicBoolean reloading = new AtomicBoolean(false);
@@ -104,7 +109,8 @@ public class MoudEngine {
         return instance;
     }
 
-    public MoudEngine(String[] launchArgs) {
+    public MoudEngine(String[] launchArgs, ExtensionBootstrap server) {
+        this.server = server;
         instance = this;
         LOGGER.startup("Initializing Moud Engine...");
 
@@ -213,8 +219,8 @@ public class MoudEngine {
                 ProfilerUI.launchAsync();
             }
 
+            this.pluginLoader.loadPlugins();
             loadUserScripts().thenRun(() -> {
-                this.pluginLoader.loadPlugins();
                 initialized.set(true);
                 this.eventDispatcher.dispatchLoadEvent("server.load");
                 LOGGER.startup("Moud Engine initialized successfully");
@@ -305,9 +311,11 @@ public class MoudEngine {
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
 
-    private void registerDefaultScriptModules() {
+    private Map<String, Object> registerDefaultScriptModules() {
+        Map<String, Object> modules = new HashMap<>();
+
         if (!scriptModules.isEmpty()) {
-            return;
+            return modules;
         }
 
         for (Field field : ScriptingAPI.class.getFields()) {
@@ -335,6 +343,8 @@ public class MoudEngine {
         scriptModules.add(MoudScriptModule.of("async", this::getAsyncManager));
         scriptModules.add(MoudScriptModule.of("assets", () -> assetProxy));
         scriptModules.add(MoudScriptModule.of("camera", () -> cameraAPI));
+
+        return modules;
     }
 
     public void reloadUserScripts() {

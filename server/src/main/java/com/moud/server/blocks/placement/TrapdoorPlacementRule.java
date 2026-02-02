@@ -1,7 +1,9 @@
 package com.moud.server.blocks.placement;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -71,6 +73,7 @@ final class TrapdoorPlacementRule extends BlockPlacementRule {
         if (facingValue == null) {
             return true;
         }
+
         BlockFace facing = PlacementRuleUtils.faceFromProperty(facingValue);
         Block behind = state.instance().getBlock(pos.relative(PlacementRuleUtils.opposite(facing)));
         return PlacementRuleUtils.isFaceFull(behind, facing);
@@ -89,6 +92,6 @@ final class TrapdoorPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isTrapdoorBlock(@Nullable Block block) {
-        return block != null && block.namespace().path().endsWith("_trapdoor");
+        return block != null && block.name().endsWith("_trapdoor");
     }
 }

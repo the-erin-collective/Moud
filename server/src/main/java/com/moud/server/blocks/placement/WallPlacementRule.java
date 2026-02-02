@@ -5,9 +5,9 @@ import java.util.Set;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +25,7 @@ final class WallPlacementRule extends BlockPlacementRule {
     private static final String SIDE_LOW = "low";
     private static final String SIDE_TALL = "tall";
 
-    private static final NamespaceID IRON_BARS = NamespaceID.from("minecraft:iron_bars");
+    private static final Key IRON_BARS = Key.key("minecraft:iron_bars");
 
     private static final Set<String> EXCEPTION_BLOCKS = Set.of(
             "minecraft:barrier",
@@ -101,14 +101,14 @@ final class WallPlacementRule extends BlockPlacementRule {
 
     private static boolean shouldWaterlog(PlacementState state) {
         Block existing = state.instance().getBlock(state.placePosition());
-        return "minecraft:water".equals(existing.namespace().asString());
+        return "minecraft:water".equals(existing.name());
     }
 
     private static boolean isWallBlock(Block block) {
         if (block == null) {
             return false;
         }
-        return block.namespace().path().endsWith("_wall");
+        return block.name().endsWith("_wall");
     }
 
     private static boolean supportsWallTall(Block blockAbove) {
@@ -180,18 +180,18 @@ final class WallPlacementRule extends BlockPlacementRule {
         if (!isExceptionForConnection(neighbor) && neighbor.registry().collisionShape().isFaceFull(neighborFaceTowardWall)) {
             return true;
         }
-        if (IRON_BARS.equals(neighbor.namespace())) {
+        if (IRON_BARS.equals(neighbor.name())) {
             return true;
         }
-        return neighbor.namespace().path().endsWith("_fence_gate");
+        return neighbor.name().endsWith("_fence_gate");
     }
 
     private static boolean isExceptionForConnection(Block block) {
-        String id = block.namespace().asString();
+        String id = block.name();
         if (EXCEPTION_BLOCKS.contains(id)) {
             return true;
         }
-        String path = block.namespace().path();
+        String path = block.name();
         if (path.endsWith("_leaves") || path.contains("leaves")) {
             return true;
         }

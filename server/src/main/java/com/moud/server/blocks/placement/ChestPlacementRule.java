@@ -3,6 +3,7 @@ package com.moud.server.blocks.placement;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -99,7 +100,7 @@ final class ChestPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean canMergeWith(@Nullable Block neighbor, @NotNull Block base, @NotNull BlockFace facing) {
-        if (!isChest(neighbor) || !neighbor.namespace().equals(base.namespace())) {
+        if (!isChest(neighbor) || !neighbor.name().equals(base.name())) {
             return false;
         }
         String neighborType = neighbor.getProperty(PROP_TYPE);
@@ -124,7 +125,7 @@ final class ChestPlacementRule extends BlockPlacementRule {
         if (block == null) {
             return false;
         }
-        String path = block.namespace().path();
+        String path = block.name();
         return "chest".equals(path) || "trapped_chest".equals(path);
     }
 }

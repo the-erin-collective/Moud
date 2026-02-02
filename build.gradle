@@ -14,8 +14,13 @@ subprojects {
 
     repositories {
         mavenCentral()
-        // Repository for Minestom SNAPSHOTS
-        maven { url 'https://jitpack.io' }
+        // JitPack only for DependencyGetter (transitive of minestom-ce-extensions).
+        maven {
+            url 'https://jitpack.io'
+            content {
+                includeGroup 'com.github.Minestom'
+            }
+        }
     }
 
     checkstyle {
@@ -25,8 +30,11 @@ subprojects {
 
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
 
     dependencies {
@@ -41,6 +49,7 @@ subprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
+        options.release.set(25)
     }
 
     tasks.withType(Test).configureEach {

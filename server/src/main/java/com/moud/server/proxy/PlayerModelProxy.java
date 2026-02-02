@@ -80,7 +80,7 @@ public class PlayerModelProxy {
         Pos spawnPos = new Pos(position.x, position.y, position.z, yaw, pitch);
         fakePlayer.setInstance(defaultInstance, spawnPos).thenRun(() -> {
             LOGGER.info("FakePlayer {} spawned at position {} in instance {}",
-                       modelId, spawnPos, defaultInstance.getUniqueId());
+                       modelId, spawnPos, defaultInstance.getUuid());
 
             if (skinUrl != null && !skinUrl.isEmpty()) {
                 applySkinToFakePlayer(skinUrl);
@@ -115,7 +115,7 @@ public class PlayerModelProxy {
         this.instanceName = instanceName;
 
         Instance targetInstance = MinecraftServer.getInstanceManager().getInstances().stream()
-                .filter(inst -> inst.getUniqueId().toString().equals(instanceName))
+                .filter(inst -> inst.getUuid().toString().equals(instanceName))
                 .findFirst()
                 .orElse(null);
 

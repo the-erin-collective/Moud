@@ -3,6 +3,7 @@ package com.moud.server.blocks.placement;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -82,14 +83,14 @@ final class DoorPlacementRule extends BlockPlacementRule {
                 return Block.AIR;
             }
             Block upper = state.instance().getBlock(pos.relative(BlockFace.TOP));
-            if (!isDoorBlock(upper) || !upper.namespace().equals(current.namespace())) {
+            if (!isDoorBlock(upper) || !upper.name().equals(current.name())) {
                 return Block.AIR;
             }
             return current;
         }
 
         Block lower = state.instance().getBlock(pos.relative(BlockFace.BOTTOM));
-        if (!isDoorBlock(lower) || !lower.namespace().equals(current.namespace())) {
+        if (!isDoorBlock(lower) || !lower.name().equals(current.name())) {
             return Block.AIR;
         }
         return current;
@@ -143,7 +144,7 @@ final class DoorPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isMatchingDoor(@Nullable Block neighbor, @NotNull Block doorBase, @NotNull BlockFace facing) {
-        if (!isDoorBlock(neighbor) || !neighbor.namespace().equals(doorBase.namespace())) {
+        if (!isDoorBlock(neighbor) || !neighbor.name().equals(doorBase.name())) {
             return false;
         }
         BlockFace neighborFacing = PlacementRuleUtils.faceFromProperty(neighbor.getProperty(PlacementRuleUtils.PROP_FACING));
@@ -152,7 +153,7 @@ final class DoorPlacementRule extends BlockPlacementRule {
     }
 
     private static boolean isDoorBlock(@Nullable Block block) {
-        return block != null && block.namespace().path().endsWith("_door") && !block.namespace().path().endsWith("_trapdoor");
+        return block != null && block.name().endsWith("_door") && !block.name().endsWith("_trapdoor");
     }
 }
 

@@ -2,8 +2,8 @@ package com.moud;
 
 import com.moud.server.MoudEngine;
 import com.moud.server.console.ServerConsole;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.extras.MojangAuth;
+import net.hollowcube.minestom.extensions.ExtensionBootstrap;
+// import net.minestom.server.extras.MojangAuth; // Removed - no longer exists in Minestom 1.21.11
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,17 +34,17 @@ public class App {
                     break;
             }
         }
-        MinecraftServer minecraftServer = MinecraftServer.init();
+        ExtensionBootstrap minecraftServer = ExtensionBootstrap.init();
 
         if (onlineMode) {
-            MojangAuth.init();
-            LOGGER.info("Mojang authentication is ENABLED.");
+            // MojangAuth.init(); // Removed - no longer exists in Minestom 1.21.11
+            LOGGER.warn("Mojang authentication is DISABLED. Feature removed in Minestom 1.21.11.");
         } else {
             LOGGER.warn("Mojang authentication is DISABLED. Players can join with any username.");
         }
 
         try {
-            MoudEngine moudEngine = new MoudEngine(args);
+            MoudEngine moudEngine = new MoudEngine(args, minecraftServer);
 
             Runtime.getRuntime().addShutdownHook(new Thread(moudEngine::shutdown));
 

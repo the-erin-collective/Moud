@@ -4,6 +4,7 @@ import java.util.Set;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
@@ -119,7 +120,7 @@ final class RailPlacementRule extends BlockPlacementRule {
         if (block == null) {
             return false;
         }
-        String path = block.namespace().path();
+        String path = block.name();
         return "rail".equals(path) || path.endsWith("_rail");
     }
 }

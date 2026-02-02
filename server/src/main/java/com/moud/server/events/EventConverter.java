@@ -113,12 +113,12 @@ public class EventConverter {
         if (event.getPlayer() == null) {
             throw new APIException("INVALID_PLAYER", "Player cannot be null in chat event");
         }
-        if (event.getMessage() == null) {
+        if (event.getRawMessage() == null) {
             throw new APIException("INVALID_MESSAGE", "Message cannot be null in chat event");
         }
         ChatEventProxy chatProxy = new ChatEventProxy(
                 event.getPlayer(),
-                event.getMessage(),
+                event.getRawMessage(),
                 event
         );
         LOGGER.debug("Converted player.chat event for: {} with message: '{}'",

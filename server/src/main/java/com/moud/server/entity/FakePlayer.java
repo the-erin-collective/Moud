@@ -77,7 +77,7 @@ public class FakePlayer extends Entity {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skinTexture, skinSignature));
         }
         var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false,
-                0, GameMode.SURVIVAL, null, null);
+                0, GameMode.SURVIVAL, null, null, 0, true);
         viewer.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
     }
 
@@ -88,7 +88,7 @@ public class FakePlayer extends Entity {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skinTexture, skinSignature));
         }
         var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false,
-                0, GameMode.SURVIVAL, null, null);
+                0, GameMode.SURVIVAL, null, null, 0, true);
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
 
         super.updateNewViewer(player);
