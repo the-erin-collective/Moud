@@ -40,3 +40,6 @@ packages/sdk/dist/
 /example/ts/.moud/
 /packages/moud-cli/dist
 /packages/moud-cli/node_modules
+/dist
+/.moud
+/libs/jolt/windows-x86_64

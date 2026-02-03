@@ -24,10 +24,17 @@ public class PluginClassLoader extends URLClassLoader {
      */
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        // 0) Check if already loaded to prevent duplicate definitions
+        Class<?> loadedClass = findLoadedClass(name);
+        if (loadedClass != null) {
+            return loadedClass;
+        }
+        
         // 1) JDK/JNI natif : always parent-first (otherwise bug)
         if (name.startsWith("java.") || name.startsWith("jdk.")) {
             return super.loadClass(name, resolve);
         }
+        
         // 2) Try first in the plugin JAR
         try {
             Class<?> c = findClass(name);
