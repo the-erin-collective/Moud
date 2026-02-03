@@ -2,6 +2,7 @@ package com.moud.server.plugin;
 
 import com.moud.plugin.api.Plugin;
 import com.moud.plugin.api.PluginApi;
+import com.moud.plugin.api.BridgePluginManager;
 import com.moud.server.assets.AssetsExtractor;
 import com.moud.server.plugin.context.PluginContextImpl;
 import com.moud.server.plugin.core.DependencyResolver;
@@ -117,6 +118,7 @@ public class PluginLoader {
      *     <li>Inspect each JAR to read {@code plugin.yml} and build a {@link PluginContainer}.</li>
      *     <li>Resolve dependencies between plugins using {@link DependencyResolver}.</li>
      *     <li>Instantiate each plugin and call its lifecycle ({@code enable()}).</li>
+     *     <li>Track bridge plugin readiness for JavaScript synchronization.</li>
      * </ol>
      * <p>
      */
@@ -134,6 +136,9 @@ public class PluginLoader {
         pluginsFailed = 0;
         skippedFiles.clear();
         loadingErrors.clear();
+        
+        // Initialize bridge plugin tracking
+        Set<String> discoveredPluginIds = new HashSet<>();
         
         try {
             List<PluginContainer> discovered = new ArrayList<>();
@@ -155,6 +160,7 @@ public class PluginLoader {
                         PluginContainer pc = inspectJar(jarPath);
                         if (pc != null) {
                             pluginsDetected++;
+                            discoveredPluginIds.add(pc.getDescription().id);
                             LOGGER.info("[PluginLoader] ✅ Plugin detected: {} v{} (ID: {})", 
                                 pc.getDescription().name, 
                                 pc.getDescription().version, 
@@ -178,6 +184,13 @@ public class PluginLoader {
             
             LOGGER.info("[PluginLoader] 📊 Scan Results: {} JARs found, {} plugins detected, {} skipped", 
                 totalJarsScanned, pluginsDetected, skippedFiles.size());
+            
+            // Configure bridge plugin manager with discovered plugins
+            if (!discoveredPluginIds.isEmpty()) {
+                BridgePluginManager.setExpectedPlugins(discoveredPluginIds);
+                LOGGER.info("[PluginLoader] 🔗 Bridge plugin manager configured with {} expected plugins: {}", 
+                           discoveredPluginIds.size(), discoveredPluginIds);
+            }
             
             if (discovered.isEmpty()) {
                 LOGGER.warn("[PluginLoader] ⚠ No valid plugins found to load");
@@ -229,6 +242,10 @@ public class PluginLoader {
                     pc.setInstance(plugin);
                     manager.register(pc.getInstance());
                     
+                    // Mark plugin as ready for bridge synchronization
+                    BridgePluginManager.markPluginReady(description.id);
+                    LOGGER.info("[PluginLoader] 🌉 Bridge plugin marked ready: {}", description.id);
+                    
                 } catch (Exception e) {
                     pluginsFailed++;
                     String error = String.format("Failed to load plugin %s: %s", 
@@ -252,6 +269,15 @@ public class PluginLoader {
             loadingErrors.add("Critical loading error: " + e.getMessage());
         } finally {
             printPluginLoadingSummary();
+            
+            // Log bridge plugin status
+            if (BridgePluginManager.isInitializationComplete()) {
+                LOGGER.info("[PluginLoader] 🎉 All bridge plugins are ready for JavaScript!");
+            } else {
+                LOGGER.warn("[PluginLoader] ⚠ Bridge plugin initialization incomplete - {} plugins pending: {}", 
+                           BridgePluginManager.getPendingPlugins().size(), 
+                           BridgePluginManager.getPendingPlugins());
+            }
         }
     }
 

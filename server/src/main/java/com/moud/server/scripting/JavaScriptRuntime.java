@@ -10,6 +10,7 @@ import com.moud.server.profiler.model.ScriptExecutionType;
 import com.moud.server.profiler.script.ScriptProfiler;
 import com.moud.server.typescript.TypeScriptTranspiler;
 import com.moud.plugin.api.BridgeRegistry;
+import com.moud.plugin.api.BridgePluginManager;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
@@ -134,29 +135,84 @@ public class JavaScriptRuntime {
     }
 
     public void bindModules(ScriptingAPI scriptingAPI, ConsoleAPI consoleAPI, Collection<MoudScriptModule> modules) {
-        CompletableFuture.runAsync(() -> {
-            jsContext.enter();
-            try {
-                Value bindings = jsContext.getBindings("js");
-                Value api = jsContext.eval("js", "({})");
+        LOGGER.info("[JavaScriptRuntime] Waiting for bridge plugins to be ready before initializing JavaScript...");
+        
+        // Wait for all bridge plugins to be ready before initializing JavaScript
+        BridgePluginManager.getReadinessFuture().thenRun(() -> {
+            LOGGER.info("[JavaScriptRuntime] All bridge plugins ready - initializing JavaScript runtime...");
+            
+            CompletableFuture.runAsync(() -> {
+                jsContext.enter();
+                try {
+                    Value bindings = jsContext.getBindings("js");
+                    Value api = jsContext.eval("js", "({})");
 
-                bindEventAPI(api, scriptingAPI);
-                bindModules(api, modules);
+                    bindEventAPI(api, scriptingAPI);
+                    bindModules(api, modules);
 
-                if (consoleAPI != null) {
-                    bindings.putMember("console", consoleAPI);
+                    if (consoleAPI != null) {
+                        bindings.putMember("console", consoleAPI);
+                    }
+
+                    bindings.putMember("Moud", api);
+                    bindings.putMember("api", api);
+                    
+                    // Inject bridge services from BridgeRegistry
+                    injectBridgeServices(bindings);
+                    
+                    // Inject bridgeReady() function for JavaScript
+                    injectBridgeReadyFunction(bindings);
+
+                    LOGGER.info("[JavaScriptRuntime] JavaScript runtime initialization completed successfully");
+                } finally {
+                    jsContext.leave();
                 }
+            }, executor);
+        }).exceptionally(throwable -> {
+            LOGGER.error("[JavaScriptRuntime] Failed to wait for bridge plugins", throwable);
+            return null;
+        });
+    }
 
-                bindings.putMember("Moud", api);
-                bindings.putMember("api", api);
-                
-                // Inject bridge services from BridgeRegistry
-                injectBridgeServices(bindings);
-
-            } finally {
-                jsContext.leave();
-            }
-        }, executor);
+    /**
+     * Injects the bridgeReady() function into JavaScript global scope.
+     * This function allows JavaScript code to await bridge plugin readiness.
+     */
+    private void injectBridgeReadyFunction(Value bindings) {
+        try {
+            bindings.putMember("bridgeReady", new ProxyExecutable() {
+                @Override
+                public Object execute(Value... arguments) {
+                    // Since we're already here, all plugins are ready, so return a resolved promise
+                    return jsContext.eval("js", "Promise.resolve()");
+                }
+            });
+            
+            // Also provide a synchronous check function
+            bindings.putMember("areBridgesReady", new ProxyExecutable() {
+                @Override
+                public Object execute(Value... arguments) {
+                    return BridgePluginManager.isInitializationComplete();
+                }
+            });
+            
+            // Provide bridge status information
+            bindings.putMember("getBridgeStatus", new ProxyExecutable() {
+                @Override
+                public Object execute(Value... arguments) {
+                    Value status = jsContext.eval("js", "({})");
+                    status.putMember("ready", BridgePluginManager.isInitializationComplete());
+                    status.putMember("loaded", BridgePluginManager.getLoadedPlugins());
+                    status.putMember("expected", BridgePluginManager.getExpectedPlugins());
+                    status.putMember("pending", BridgePluginManager.getPendingPlugins());
+                    return status;
+                }
+            });
+            
+            LOGGER.info("Injected bridgeReady(), areBridgesReady(), and getBridgeStatus() functions into JavaScript");
+        } catch (Exception e) {
+            LOGGER.error("Failed to inject bridge ready functions into JavaScript", e);
+        }
     }
 
     /**
