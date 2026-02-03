@@ -172,6 +172,10 @@ public class MoudEngine {
             clientScriptManager.initialize();
 
             this.eventDispatcher = new EventDispatcher(this);
+            
+            // Load plugins BEFORE JavaScript runtime to prevent race conditions
+            this.pluginLoader.loadPlugins();
+            
             this.runtime = new JavaScriptRuntime(this);
             this.asyncManager = new AsyncManager(this);
             registerDefaultScriptModules();
@@ -219,7 +223,6 @@ public class MoudEngine {
                 ProfilerUI.launchAsync();
             }
 
-            this.pluginLoader.loadPlugins();
             loadUserScripts().thenRun(() -> {
                 initialized.set(true);
                 this.eventDispatcher.dispatchLoadEvent("server.load");

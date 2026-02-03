@@ -43,3 +43,7 @@ packages/sdk/dist/
 /dist
 /.moud
 /libs/jolt/windows-x86_64
+/api/bin
+/client-mod/bin
+*.class
+/server/bin

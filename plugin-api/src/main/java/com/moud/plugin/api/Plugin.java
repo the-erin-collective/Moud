@@ -133,6 +133,19 @@ public abstract class Plugin implements MoudPlugin {
         return Player.wrap(context, playerContext);
     }
 
+    /**
+     * Register a bridge service that can be accessed from JavaScript.
+     * The service will be available as a global variable in JavaScript with the given ID.
+     * Service methods should be annotated with {@link org.graalvm.polyglot.HostAccess.Export}
+     * to be accessible from JavaScript.
+     * 
+     * @param id The global variable name for the service in JavaScript
+     * @param service The service object containing methods to expose to JavaScript
+     */
+    protected final void registerBridge(String id, Object service) {
+        BridgeRegistry.register(id, service, description().id());
+    }
+
     private void initializeFacades() {
         Objects.requireNonNull(context, "PluginContext has not been provided yet");
         this.world = new WorldDsl(context);

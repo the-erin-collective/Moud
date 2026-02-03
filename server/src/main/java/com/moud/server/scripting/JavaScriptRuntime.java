@@ -9,6 +9,7 @@ import com.moud.server.profiler.model.ScriptExecutionMetadata;
 import com.moud.server.profiler.model.ScriptExecutionType;
 import com.moud.server.profiler.script.ScriptProfiler;
 import com.moud.server.typescript.TypeScriptTranspiler;
+import com.moud.plugin.api.BridgeRegistry;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
@@ -148,11 +149,38 @@ public class JavaScriptRuntime {
 
                 bindings.putMember("Moud", api);
                 bindings.putMember("api", api);
+                
+                // Inject bridge services from BridgeRegistry
+                injectBridgeServices(bindings);
 
             } finally {
                 jsContext.leave();
             }
         }, executor);
+    }
+
+    /**
+     * Injects all registered bridge services into the JavaScript global scope.
+     * Each registered service becomes a global variable accessible from JavaScript.
+     */
+    private void injectBridgeServices(Value bindings) {
+        Map<String, Object> bridgeServices = BridgeRegistry.getAllServices();
+        
+        for (Map.Entry<String, Object> entry : bridgeServices.entrySet()) {
+            String serviceId = entry.getKey();
+            Object service = entry.getValue();
+            
+            try {
+                bindings.putMember(serviceId, service);
+                LOGGER.info("Injected bridge service '{}' into JavaScript global scope", serviceId);
+            } catch (Exception e) {
+                LOGGER.error("Failed to inject bridge service '{}' into JavaScript", serviceId, e);
+            }
+        }
+        
+        if (!bridgeServices.isEmpty()) {
+            LOGGER.info("Successfully injected {} bridge services into JavaScript runtime", bridgeServices.size());
+        }
     }
 
     public CompletableFuture<Void> registerGlobal(String name, Object value) {
