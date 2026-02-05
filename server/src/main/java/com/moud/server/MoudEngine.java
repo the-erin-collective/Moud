@@ -269,8 +269,11 @@ public class MoudEngine {
     }
 
     private void bindGlobalAPIs() {
+        LOGGER.info("[MoudEngine] bindGlobalAPIs() called from thread: {}", Thread.currentThread().getName());
         this.scriptingAPI = new ScriptingAPI(this);
+        LOGGER.info("[MoudEngine] About to call runtime.bindModules() with {} modules", scriptModules.size());
         runtime.bindModules(scriptingAPI, consoleAPI, scriptModules);
+        LOGGER.info("[MoudEngine] bindModules() completed");
     }
 
     public void registerSystem(MoudSystem system) {

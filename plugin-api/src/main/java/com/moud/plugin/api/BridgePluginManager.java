@@ -74,6 +74,10 @@ public class BridgePluginManager {
         
         String normalizedId = pluginId.trim();
         
+        LOGGER.info("[BridgePluginManager] DEBUG - markPluginReady called for: {}", normalizedId);
+        LOGGER.info("[BridgePluginManager] DEBUG - Current expected plugins: {}", expectedPlugins);
+        LOGGER.info("[BridgePluginManager] DEBUG - Current loaded plugins: {}", loadedPlugins);
+        
         if (loadedPlugins.contains(normalizedId)) {
             LOGGER.warn("Plugin '{}' was already marked as ready", normalizedId);
             return;
@@ -84,8 +88,16 @@ public class BridgePluginManager {
                    normalizedId, loadedPlugins.size(), expectedPlugins.size());
         
         // Check if all plugins are ready
-        if (allPluginsReady() && !initializationComplete.get()) {
+        boolean allReady = allPluginsReady();
+        LOGGER.info("[BridgePluginManager] DEBUG - allPluginsReady: {}, initializationComplete: {}", 
+                   allReady, initializationComplete.get());
+        
+        if (allReady && !initializationComplete.get()) {
+            LOGGER.info("[BridgePluginManager] DEBUG - Calling completeInitialization()");
             completeInitialization();
+        } else {
+            LOGGER.info("[BridgePluginManager] DEBUG - Not completing initialization. All ready: {}, Already complete: {}", 
+                       allReady, initializationComplete.get());
         }
     }
     
@@ -129,12 +141,24 @@ public class BridgePluginManager {
      * @return CompletableFuture that completes when all plugins are ready
      */
     public static synchronized CompletableFuture<Void> getReadinessFuture() {
+        LOGGER.info("[BridgePluginManager] DEBUG - getReadinessFuture() called");
+        LOGGER.info("[BridgePluginManager] DEBUG - initializationStarted: {}, initializationComplete: {}, readinessFuture null: {}", 
+                   initializationStarted.get(), initializationComplete.get(), readinessFuture == null);
+        
+        // If initialization is already complete, return a pre-completed future
+        if (initializationComplete.get()) {
+            LOGGER.info("[BridgePluginManager] DEBUG - Returning pre-completed future (already complete)");
+            return CompletableFuture.completedFuture(null);
+        }
+        
         if (readinessFuture == null) {
             initializationStarted.set(true);
             readinessFuture = new CompletableFuture<>();
+            LOGGER.info("[BridgePluginManager] DEBUG - Created new readiness future");
             
             if (allPluginsReady()) {
                 // If all plugins are already ready, complete immediately
+                LOGGER.info("[BridgePluginManager] DEBUG - All plugins ready, completing immediately");
                 completeInitialization();
             } else {
                 LOGGER.info("[BridgePluginManager] Waiting for {} plugins: {}", 
@@ -147,6 +171,8 @@ public class BridgePluginManager {
                     }
                 }, 50, 50, TimeUnit.MILLISECONDS);
             }
+        } else {
+            LOGGER.info("[BridgePluginManager] DEBUG - Returning existing readiness future");
         }
         
         return readinessFuture;
@@ -190,14 +216,26 @@ public class BridgePluginManager {
      * Internal method to mark initialization as complete and trigger callbacks.
      */
     private static void completeInitialization() {
+        LOGGER.info("[BridgePluginManager] DEBUG - completeInitialization() called");
+        LOGGER.info("[BridgePluginManager] DEBUG - initializationComplete before: {}", initializationComplete.get());
+        LOGGER.info("[BridgePluginManager] DEBUG - readinessFuture null: {}", readinessFuture == null);
+        
         if (initializationComplete.compareAndSet(false, true)) {
             LOGGER.info("[BridgePluginManager] All bridge plugins ready! Loaded {}/{} plugins: {}", 
                        loadedPlugins.size(), expectedPlugins.size(), loadedPlugins);
             
             if (readinessFuture != null) {
+                LOGGER.info("[BridgePluginManager] DEBUG - Completing readiness future");
                 readinessFuture.complete(null);
+                LOGGER.info("[BridgePluginManager] DEBUG - Readiness future completed");
+            } else {
+                LOGGER.warn("[BridgePluginManager] DEBUG - Readiness future was null!");
             }
+        } else {
+            LOGGER.info("[BridgePluginManager] DEBUG - Initialization was already complete");
         }
+        
+        LOGGER.info("[BridgePluginManager] DEBUG - initializationComplete after: {}", initializationComplete.get());
     }
     
     /**
