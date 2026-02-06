@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BridgePluginManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(BridgePluginManager.class);
     
-    // Default expected bridge plugins - can be configured dynamically
-    private static volatile Set<String> expectedPlugins = Set.of("trove", "terra", "polar", "pvp", "base");
+    // Default expected bridge plugins - now derived from BridgePlugin enum
+    private static volatile Set<String> expectedPlugins = Set.of(BridgePlugin.getAllPluginIds());
     private static final Set<String> loadedPlugins = ConcurrentHashMap.newKeySet();
     private static final AtomicBoolean initializationComplete = new AtomicBoolean(false);
     private static final AtomicBoolean initializationStarted = new AtomicBoolean(false);
@@ -39,6 +39,7 @@ public class BridgePluginManager {
     
     /**
      * Sets the expected bridge plugin IDs. This should be called before plugin loading begins.
+     * Assumes plugins have already been discovered via PluginDiscoveryService.
      * 
      * @param pluginIds Set of plugin IDs that are expected to register bridge services
      */
@@ -46,6 +47,15 @@ public class BridgePluginManager {
         if (initializationStarted.get()) {
             LOGGER.warn("Cannot change expected plugins after initialization has started");
             return;
+        }
+        
+        // Validate that all plugins were already discovered
+        PluginDiscoveryService discovery = PluginDiscoveryService.getInstance();
+        for (String pluginId : pluginIds) {
+            if (!discovery.isPluginDiscovered(pluginId)) {
+                LOGGER.error("[BridgePluginManager] ❌ FATAL: Plugin '{}' was not discovered before setExpectedPlugins()", pluginId);
+                throw new IllegalStateException("Plugin " + pluginId + " must be discovered before setting expected plugins");
+            }
         }
         
         expectedPlugins = Set.copyOf(pluginIds);
@@ -64,6 +74,7 @@ public class BridgePluginManager {
     /**
      * Called by each bridge plugin after it has registered its bridge services.
      * This marks the plugin as ready for JavaScript consumption.
+     * Assumes the plugin was already discovered during the scan phase.
      * 
      * @param pluginId The unique identifier of the bridge plugin
      */
@@ -73,6 +84,13 @@ public class BridgePluginManager {
         }
         
         String normalizedId = pluginId.trim();
+        
+        // Validate the plugin was already discovered (but don't try to discover it again)
+        PluginDiscoveryService discovery = PluginDiscoveryService.getInstance();
+        if (!discovery.isPluginDiscovered(normalizedId)) {
+            LOGGER.error("[BridgePluginManager] ❌ FATAL: Plugin '{}' was not discovered during scan phase", normalizedId);
+            throw new RuntimeException("FATAL: Plugin " + normalizedId + " must be discovered before marking ready");
+        }
         
         LOGGER.info("[BridgePluginManager] DEBUG - markPluginReady called for: {}", normalizedId);
         LOGGER.info("[BridgePluginManager] DEBUG - Current expected plugins: {}", expectedPlugins);
@@ -93,7 +111,15 @@ public class BridgePluginManager {
                    allReady, initializationComplete.get());
         
         if (allReady && !initializationComplete.get()) {
-            LOGGER.info("[BridgePluginManager] DEBUG - Calling completeInitialization()");
+            LOGGER.info("[BridgePluginManager] DEBUG - All plugins ready, completing initialization");
+            // Complete discovery when all plugins are ready
+            try {
+                discovery.completeDiscovery();
+            } catch (Exception e) {
+                LOGGER.error("[BridgePluginManager] ❌ FATAL: Failed to complete plugin discovery: {}", e.getMessage());
+                throw new RuntimeException("FATAL: Plugin discovery completion failed", e);
+            }
+            // Then complete the initialization for JavaScript binding
             completeInitialization();
         } else {
             LOGGER.info("[BridgePluginManager] DEBUG - Not completing initialization. All ready: {}, Already complete: {}", 
@@ -229,7 +255,7 @@ public class BridgePluginManager {
                 readinessFuture.complete(null);
                 LOGGER.info("[BridgePluginManager] DEBUG - Readiness future completed");
             } else {
-                LOGGER.warn("[BridgePluginManager] DEBUG - Readiness future was null!");
+                LOGGER.info("[BridgePluginManager] All plugins loaded before JavaScript runtime started - this is normal");
             }
         } else {
             LOGGER.info("[BridgePluginManager] DEBUG - Initialization was already complete");

@@ -120,9 +120,11 @@ public class MoudEngine {
         int port = getPortFromArgs(launchArgs);
 
         try {
+            LOGGER.info("[MoudEngine] 🔥 CONSTRUCTOR STARTED! 🔥");
             Path projectRoot = ProjectLoader.resolveProjectRoot(launchArgs)
                     .orElseThrow(() -> new IllegalStateException("Could not find a valid Moud project root."));
             this.projectRoot = projectRoot;
+            LOGGER.info("[MoudEngine] Project root resolved to: {}", projectRoot);
 
             LOGGER.info(LogContext.builder()
                     .put("project_root", projectRoot.toString())
@@ -146,8 +148,18 @@ public class MoudEngine {
 
             this.pluginManager = new PluginManager(projectRoot);
             this.pluginLoader = new PluginLoader(pluginManager);
-
-            this.pluginLoader.loadAssets();
+            
+            try {
+                System.out.println("🔥 DEBUG: About to call loadAssets()...");
+                LOGGER.info("[MoudEngine] About to call loadAssets()...");
+                this.pluginLoader.loadAssets();
+                System.out.println("🔥 DEBUG: loadAssets() completed.");
+                LOGGER.info("[MoudEngine] loadAssets() completed.");
+            } catch (Exception e) {
+                System.out.println("🔥 DEBUG: Exception during loadAssets(): " + e.getMessage());
+                LOGGER.error("[MoudEngine] Exception during loadAssets(): {}", e.getMessage(), e);
+                throw e;
+            }
 
             this.assetManager = new AssetManager(projectRoot);
             assetManager.initialize();
@@ -174,11 +186,15 @@ public class MoudEngine {
             this.eventDispatcher = new EventDispatcher(this);
             
             // Load plugins BEFORE JavaScript runtime to prevent race conditions
+            LOGGER.info("[MoudEngine] About to call loadPlugins()...");
             this.pluginLoader.loadPlugins();
+            LOGGER.info("[MoudEngine] loadPlugins() completed.");
             
             this.runtime = new JavaScriptRuntime(this);
+            LOGGER.info("[MoudEngine] JavaScriptRuntime created.");
             this.asyncManager = new AsyncManager(this);
             registerDefaultScriptModules();
+            LOGGER.info("[MoudEngine] About to call loadUserScripts()...");
 
             this.resourcePackService = new ResourcePackService();
             resourcePackService.initializeAsync();

@@ -47,3 +47,9 @@ packages/sdk/dist/
 /client-mod/bin
 *.class
 /server/bin
+/dist-clean
+/dist-thread-safe-java-bridge
+/example
+/example
+/test-bridge-plugin
+/test-plugin

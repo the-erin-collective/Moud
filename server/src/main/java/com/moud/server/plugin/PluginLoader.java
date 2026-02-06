@@ -3,6 +3,7 @@ package com.moud.server.plugin;
 import com.moud.plugin.api.Plugin;
 import com.moud.plugin.api.PluginApi;
 import com.moud.plugin.api.BridgePluginManager;
+import com.moud.plugin.api.PluginDiscoveryService;
 import com.moud.server.assets.AssetsExtractor;
 import com.moud.server.plugin.context.PluginContextImpl;
 import com.moud.server.plugin.core.DependencyResolver;
@@ -65,6 +66,8 @@ public class PluginLoader {
      * </ul>
      */
     public void loadAssets() {
+        System.out.println("🔥 DEBUG: loadAssets() METHOD CALLED! 🔥");
+        LOGGER.info("[PluginLoader] 🔥 loadAssets() METHOD CALLED! 🔥");
         LOGGER.info("[PluginLoader] Starting asset loading from directory: {}", PLUGINS_DIR);
         
         if (!Files.isDirectory(PLUGINS_DIR)) {
@@ -124,6 +127,7 @@ public class PluginLoader {
      */
     public void loadPlugins() {
         LOGGER.info("[PluginLoader] =======================================");
+        LOGGER.info("[PluginLoader] 🔥 loadPlugins() METHOD CALLED! 🔥");
         LOGGER.info("[PluginLoader] Starting Java Plugin Loading System");
         LOGGER.info("[PluginLoader] Plugin Directory: {}", PLUGINS_DIR);
         LOGGER.info("[PluginLoader] Target API Version: {}", PluginApi.API_VERSION);
@@ -139,6 +143,7 @@ public class PluginLoader {
         
         // Initialize bridge plugin tracking
         Set<String> discoveredPluginIds = new HashSet<>();
+        PluginDiscoveryService discovery = PluginDiscoveryService.getInstance();
         
         try {
             List<PluginContainer> discovered = new ArrayList<>();
@@ -160,11 +165,16 @@ public class PluginLoader {
                         PluginContainer pc = inspectJar(jarPath);
                         if (pc != null) {
                             pluginsDetected++;
-                            discoveredPluginIds.add(pc.getDescription().id);
+                            String pluginId = pc.getDescription().id;
+                            discoveredPluginIds.add(pluginId);
+                            
+                            // Discover the plugin in the discovery service
+                            discovery.discoverPlugin(pluginId);
+                            
                             LOGGER.info("[PluginLoader] ✅ Plugin detected: {} v{} (ID: {})", 
                                 pc.getDescription().name, 
                                 pc.getDescription().version, 
-                                pc.getDescription().id);
+                                pluginId);
                             discovered.add(pc);
                         } else {
                             LOGGER.warn("[PluginLoader] ❌ Not a valid plugin: {}", jarPath.getFileName());
@@ -187,6 +197,10 @@ public class PluginLoader {
             
             // Configure bridge plugin manager with discovered plugins
             if (!discoveredPluginIds.isEmpty()) {
+                LOGGER.info("[PluginLoader] 🔗 Configuring bridge plugin manager with discovered plugins...");
+                
+                // Note: Plugins were already discovered in the loop above via discovery.discoverPlugin()
+                // Just set the expected plugins list without re-discovering
                 BridgePluginManager.setExpectedPlugins(discoveredPluginIds);
                 LOGGER.info("[PluginLoader] 🔗 Bridge plugin manager configured with {} expected plugins: {}", 
                            discoveredPluginIds.size(), discoveredPluginIds);
@@ -242,9 +256,8 @@ public class PluginLoader {
                     pc.setInstance(plugin);
                     manager.register(pc.getInstance());
                     
-                    // Mark plugin as ready for bridge synchronization
-                    BridgePluginManager.markPluginReady(description.id);
-                    LOGGER.info("[PluginLoader] 🌉 Bridge plugin marked ready: {}", description.id);
+                    // Note: Plugin marks itself ready in onEnable() - no need to call markPluginReady() here
+                    LOGGER.info("[PluginLoader] 🌉 Bridge plugin will mark itself ready in onEnable()");
                     
                 } catch (Exception e) {
                     pluginsFailed++;
@@ -263,6 +276,9 @@ public class PluginLoader {
                     }
                 }
             }
+            
+            // Note: Plugin discovery completion is handled automatically by BridgePluginManager
+            // when the last plugin calls markPluginReady() in its onEnable() method
             
         } catch (Exception e) {
             LOGGER.error("[PluginLoader] ❌ Critical error during plugin loading", e);
@@ -365,7 +381,8 @@ public class PluginLoader {
                 
                 // Try to load the main class to verify it exists
                 Class<?> mainClass = cl.loadClass(desc.mainClass);
-                if (!com.moud.plugin.api.Plugin.class.isAssignableFrom(mainClass)) {
+                Class<?> pluginClass = cl.loadClass("com.moud.plugin.api.Plugin");
+                if (!pluginClass.isAssignableFrom(mainClass)) {
                     LOGGER.error("[PluginLoader] ❌ Main class {} in {} does not extend Plugin", 
                         desc.mainClass, jarPath.getFileName());
                     LOGGER.info("[PluginLoader] 💡 Main class must extend com.moud.plugin.api.Plugin");

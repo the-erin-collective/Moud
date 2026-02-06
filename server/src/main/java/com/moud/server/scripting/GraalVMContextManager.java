@@ -2,6 +2,7 @@ package com.moud.server.scripting;
 
 import com.moud.server.logging.MoudLogger;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
 import java.util.concurrent.BlockingQueue;
@@ -31,6 +32,8 @@ public class GraalVMContextManager {
         // Create the GraalVM context with proper permissions
         this.context = Context.newBuilder("js")
                 .allowAllAccess(true)
+                .allowHostAccess(HostAccess.ALL)
+                .allowHostClassLookup(s -> true)
                 .allowIO(true)
                 .option("engine.WarnInterpreterOnly", "false")
                 .build();
