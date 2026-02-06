@@ -201,18 +201,14 @@ public final class ChunkPhysicsManager {
             return;
         }
 
-        BodyCreationSettings settings;
-        try {
-            boolean fullBlocksOnly = !service.isDefaultInstance(chunk.getInstance());
-            settings = ChunkMesher.createChunk(chunk, fullBlocksOnly);
-        } catch (Exception ex) {
-            LOGGER.error("Chunk meshing exception", ex);
-            return;
-        }
+        // Capture chunk data needed for meshing on physics thread
+        final int chunkX = chunk.getChunkX();
+        final int chunkZ = chunk.getChunkZ();
+        final boolean fullBlocksOnly = !service.isDefaultInstance(chunk.getInstance());
+        final ChunkKey key = ChunkKey.from(chunk);
+        final CollisionGroup group = service.collisionGroupForInstance(chunk.getInstance());
 
-        ChunkKey key = ChunkKey.from(chunk);
-        CollisionGroup group = service.collisionGroupForInstance(chunk.getInstance());
-
+        // Execute entire meshing and body creation on physics thread to avoid GC issues
         service.executeOnPhysicsThread(() -> {
             Integer oldBodyId = chunkBodies.remove(key);
             BodyInterface bi = service.getBodyInterface();
@@ -222,11 +218,20 @@ public final class ChunkPhysicsManager {
                 bi.destroyBody(oldBodyId);
             }
 
+            // Create body settings on physics thread to prevent premature GC
+            BodyCreationSettings settings;
+            try {
+                settings = ChunkMesher.createChunk(chunk, fullBlocksOnly);
+            } catch (Exception ex) {
+                LOGGER.error("Chunk meshing exception", ex);
+                return;
+            }
+
             if (settings == null) {
                 LOGGER.warn(
                         "ChunkMesher returned null settings for chunk ({}, {}) - Empty or Air?",
-                        chunk.getChunkX(),
-                        chunk.getChunkZ()
+                        chunkX,
+                        chunkZ
                 );
                 return;
             }
